@@ -1,10 +1,12 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from .forms import RegisterForm, PostForm
+from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth import login
 from django.contrib.auth.models import User, Group
 from .models import Post
 
+@login_required(login_url="/accounts/login")
 def home(request):
     posts = Post.objects.all()
     if request.method == "POST":
@@ -29,7 +31,8 @@ def home(request):
                     pass
     return render(request, 'main/home.html', {'posts':posts})
 
-
+@permission_required("main.add_post", login_url="/accounts/login", raise_exception=True)
+@login_required(login_url="/accounts/login")
 def create_post(request):
     if request.method == "POST":
         form = PostForm(request.POST)
